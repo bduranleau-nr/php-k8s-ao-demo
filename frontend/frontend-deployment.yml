@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: guestbook
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: guestbook
+        tier: frontend
+      annotations:
+        instrumentation.newrelic.com/inject-php: "true"
+        instrumentation.newrelic.com/php-exec-command: "apache2-foreground"
+    spec:
+      containers:
+        - name: php-redis
+          image: us-docker.pkg.dev/google-samples/containers/gke/gb-frontend:v5
+          env:
+            - name: GET_HOSTS_FROM
+              value: "dns"
+            - name: NEW_RELIC_APP_NAME
+              value: guestbook-demo
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - containerPort: 80
